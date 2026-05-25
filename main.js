@@ -116,33 +116,36 @@ function showSidebar(d) {
     if (!stateName) return;
 
     const yearData = climateData[stateName]?.years?.[currentYear];
-    const baseline = climateData[stateName]?.baseline;
     const tas = yearData?.tas_hist ?? yearData?.tas_ssp585;
-    const tasRaw_F = tasRaw !== undefined ? (tasRaw * 9/5 + 32).toFixed(1) : null;
-const tas_F = tas !== undefined ? (tas * 9/5).toFixed(2) : null;
+    const tasRaw = yearData?.tas_raw;
+    const pr = yearData?.pr_hist ?? yearData?.pr_ssp585;
 
-document.getElementById("state-stats").innerHTML = `
-    <div class="stat-item">
-        <span class="stat-label">Avg Temperature</span>
-        <span class="stat-value">${tasRaw_F !== null ? tasRaw_F + " °F" : "N/A"}</span>
-    </div>
-    <div class="stat-item">
-        <span class="stat-label">Warming Since 1995</span>
-        <span class="stat-value">${tas_F !== null ? (tas > 0 ? "+" : "") + tas_F + " °F" : "N/A"}</span>
-    </div>
-    <div class="stat-item">
-        <span class="stat-label">Precipitation</span>
-        <span class="stat-value">${pr !== undefined ? pr.toFixed(2) + " mm/day" : "N/A"}</span>
-    </div>
-    <div class="stat-item">
-        <span class="stat-label">Year</span>
-        <span class="stat-value">${currentYear}</span>
-    </div>
-    <div class="stat-item">
-        <span class="stat-label">Scenario</span>
-        <span class="stat-value">${currentYear <= 2014 ? "Historical" : "SSP5-8.5"}</span>
-    </div>
-`;
+    const tasRaw_F = tasRaw !== undefined ? (tasRaw * 9/5 + 32).toFixed(1) : null;
+    const tas_F = tas !== undefined ? (tas * 9/5).toFixed(2) : null;
+
+    document.getElementById("state-name").textContent = stateName;
+    document.getElementById("state-stats").innerHTML = `
+        <div class="stat-item">
+            <span class="stat-label">Avg Temperature</span>
+            <span class="stat-value">${tasRaw_F !== null ? tasRaw_F + " °F" : "N/A"}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Warming Since 1995</span>
+            <span class="stat-value">${tas_F !== null ? (tas > 0 ? "+" : "") + tas_F + " °F" : "N/A"}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Precipitation</span>
+            <span class="stat-value">${pr !== undefined ? pr.toFixed(2) + " mm/day" : "N/A"}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Year</span>
+            <span class="stat-value">${currentYear}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Scenario</span>
+            <span class="stat-value">${currentYear <= 2014 ? "Historical" : "SSP5-8.5"}</span>
+        </div>
+    `;
 
     document.getElementById("sidebar").classList.remove("hidden");
 }
