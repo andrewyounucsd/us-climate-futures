@@ -122,7 +122,7 @@ function drawLegend() {
     const grad = defs.append("linearGradient").attr("id", "legend-grad");
 
     if (currentVar === "temperature") {
-        document.getElementById("legend-label").textContent = "Temperature Anomaly — yellow = cooler, red = hotter";
+        document.getElementById("legend-label").textContent = "Temperature Anomaly: yellow = cooler, red = hotter";
         d3.range(0, 1.01, 0.1).forEach(t => {
             grad.append("stop")
                 .attr("offset", `${t * 100}%`)
@@ -130,15 +130,16 @@ function drawLegend() {
         });
         const scale = d3.scaleLinear().domain([-2, 6]).range([0, legendWidth]);
         legendSvg.append("rect")
+            .attr("x", 10)
             .attr("width", legendWidth).attr("height", legendHeight)
             .style("fill", "url(#legend-grad)");
         legendSvg.append("g")
-            .attr("transform", `translate(0, ${legendHeight})`)
+            .attr("transform", `translate(10, ${legendHeight})`)
             .call(d3.axisBottom(scale).ticks(5).tickSize(3))
             .call(g => g.select(".domain").remove())
             .call(g => g.selectAll("text").style("fill", "#888").style("font-size", "10px"));
     } else {
-        document.getElementById("legend-label").textContent = "Precipitation (mm/day) — light = dry, dark = wet";
+        document.getElementById("legend-label").textContent = "Precipitation (mm/day): light = dry, dark = wet";
         d3.range(0, 1.01, 0.1).forEach(t => {
             grad.append("stop")
                 .attr("offset", `${t * 100}%`)
@@ -146,10 +147,11 @@ function drawLegend() {
         });
         const scale = d3.scaleLinear().domain([0, 6]).range([0, legendWidth]);
         legendSvg.append("rect")
+            .attr("x", 10)
             .attr("width", legendWidth).attr("height", legendHeight)
             .style("fill", "url(#legend-grad)");
         legendSvg.append("g")
-            .attr("transform", `translate(0, ${legendHeight})`)
+            .attr("transform", `translate(10, ${legendHeight})`)
             .call(d3.axisBottom(scale).ticks(5).tickSize(3))
             .call(g => g.select(".domain").remove())
             .call(g => g.selectAll("text").style("fill", "#888").style("font-size", "10px"));
