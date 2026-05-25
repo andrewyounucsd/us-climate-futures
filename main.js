@@ -85,7 +85,7 @@ Promise.all([
         .attr("d", path)
         .attr("fill", "#2a2d3e")
         .attr("stroke", "#000")
-        .attr("stroke-width", "0.5");
+        .attr("stroke-width", "0.5")
         .on("click", (event, d) => showSidebar(d));
 
     updateMap();
