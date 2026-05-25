@@ -48,13 +48,12 @@ function getStateColor(d) {
     const stateName = getStateName(d.id);
     if (!stateName || !climateData[stateName]) return "#2a2d3e";
 
-    const yearData = climateData[stateName][currentYear];
+    const yearData = climateData[stateName]?.years?.[currentYear];
     if (!yearData) return "#2a2d3e";
 
     if (currentVar === "temperature") {
         const val = yearData.tas_hist ?? yearData.tas_ssp585;
         if (val === undefined) return "#2a2d3e";
-        // RdYlBu is blue=cold, red=hot but reversed, so we flip
         return tempScale(val);
     } else {
         const val = yearData.pr_hist ?? yearData.pr_ssp585;
@@ -116,14 +115,20 @@ function showSidebar(d) {
     const stateName = getStateName(d.id);
     if (!stateName) return;
 
-    const yearData = climateData[stateName]?.[currentYear];
+    const yearData = climateData[stateName]?.years?.[currentYear];
+    const baseline = climateData[stateName]?.baseline;
     const tas = yearData?.tas_hist ?? yearData?.tas_ssp585;
+    const tasRaw = yearData?.tas_raw;
     const pr = yearData?.pr_hist ?? yearData?.pr_ssp585;
 
     document.getElementById("state-name").textContent = stateName;
     document.getElementById("state-stats").innerHTML = `
         <div class="stat-item">
-            <span class="stat-label">Temperature Anomaly</span>
+            <span class="stat-label">Avg Temperature</span>
+            <span class="stat-value">${tasRaw !== undefined ? tasRaw.toFixed(1) + " °C" : "N/A"}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Warming vs 1995–2014</span>
             <span class="stat-value">${tas !== undefined ? (tas > 0 ? "+" : "") + tas.toFixed(2) + " °C" : "N/A"}</span>
         </div>
         <div class="stat-item">
