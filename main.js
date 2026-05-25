@@ -16,7 +16,7 @@ const mapGroup = svg.append("g");
 
 const tempScale = d3.scaleSequential()
     .domain([-2, 6])
-    .interpolator(d3.interpolateRdYlBu)
+    .interpolator(d3.interpolateYlOrRd)
     .clamp(true);
 
 const precipScale = d3.scaleSequential()
@@ -55,7 +55,7 @@ function getStateColor(d) {
         const val = yearData.tas_hist ?? yearData.tas_ssp585;
         if (val === undefined) return "#2a2d3e";
         // RdYlBu is blue=cold, red=hot but reversed, so we flip
-        return d3.interpolateRdYlBu(1 - (val + 2) / 8);
+        return tempScale(val);
     } else {
         const val = yearData.pr_hist ?? yearData.pr_ssp585;
         return val !== undefined ? precipScale(val) : "#2a2d3e";
