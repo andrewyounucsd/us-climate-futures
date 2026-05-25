@@ -89,6 +89,7 @@ Promise.all([
 
     updateMap();
     setupControls();
+    drawLegend();
 });
 
 function setupControls() {
@@ -107,8 +108,52 @@ function setupControls() {
             btn.classList.add("active");
             currentVar = btn.dataset.var;
             updateMap();
+            drawLegend();
         });
     });
+}
+
+function drawLegend() {
+    const legendSvg = d3.select("#legend-svg");
+    legendSvg.selectAll("*").remove();
+
+    const legendWidth = 300, legendHeight = 16;
+    const defs = legendSvg.append("defs");
+    const grad = defs.append("linearGradient").attr("id", "legend-grad");
+
+    if (currentVar === "temperature") {
+        document.getElementById("legend-label").textContent = "Temperature Anomaly — yellow = cooler, red = hotter";
+        d3.range(0, 1.01, 0.1).forEach(t => {
+            grad.append("stop")
+                .attr("offset", `${t * 100}%`)
+                .attr("stop-color", tempScale(t * 8 - 2));
+        });
+        const scale = d3.scaleLinear().domain([-2, 6]).range([0, legendWidth]);
+        legendSvg.append("rect")
+            .attr("width", legendWidth).attr("height", legendHeight)
+            .style("fill", "url(#legend-grad)");
+        legendSvg.append("g")
+            .attr("transform", `translate(0, ${legendHeight})`)
+            .call(d3.axisBottom(scale).ticks(5).tickSize(3))
+            .call(g => g.select(".domain").remove())
+            .call(g => g.selectAll("text").style("fill", "#888").style("font-size", "10px"));
+    } else {
+        document.getElementById("legend-label").textContent = "Precipitation (mm/day) — light = dry, dark = wet";
+        d3.range(0, 1.01, 0.1).forEach(t => {
+            grad.append("stop")
+                .attr("offset", `${t * 100}%`)
+                .attr("stop-color", precipScale(t * 6));
+        });
+        const scale = d3.scaleLinear().domain([0, 6]).range([0, legendWidth]);
+        legendSvg.append("rect")
+            .attr("width", legendWidth).attr("height", legendHeight)
+            .style("fill", "url(#legend-grad)");
+        legendSvg.append("g")
+            .attr("transform", `translate(0, ${legendHeight})`)
+            .call(d3.axisBottom(scale).ticks(5).tickSize(3))
+            .call(g => g.select(".domain").remove())
+            .call(g => g.selectAll("text").style("fill", "#888").style("font-size", "10px"));
+    }
 }
 
 function showSidebar(d) {
