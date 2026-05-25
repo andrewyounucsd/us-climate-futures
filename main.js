@@ -86,6 +86,7 @@ Promise.all([
         .attr("fill", "#2a2d3e")
         .attr("stroke", "#000")
         .attr("stroke-width", "0.5");
+        .on("click", (event, d) => showSidebar(d));
 
     updateMap();
     setupControls();
@@ -110,3 +111,38 @@ function setupControls() {
         });
     });
 }
+
+function showSidebar(d) {
+    const stateName = getStateName(d.id);
+    if (!stateName) return;
+
+    const yearData = climateData[stateName]?.[currentYear];
+    const tas = yearData?.tas_hist ?? yearData?.tas_ssp585;
+    const pr = yearData?.pr_hist ?? yearData?.pr_ssp585;
+
+    document.getElementById("state-name").textContent = stateName;
+    document.getElementById("state-stats").innerHTML = `
+        <div class="stat-item">
+            <span class="stat-label">Temperature Anomaly</span>
+            <span class="stat-value">${tas !== undefined ? (tas > 0 ? "+" : "") + tas.toFixed(2) + " °C" : "N/A"}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Precipitation</span>
+            <span class="stat-value">${pr !== undefined ? pr.toFixed(2) + " mm/day" : "N/A"}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Year</span>
+            <span class="stat-value">${currentYear}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Scenario</span>
+            <span class="stat-value">${currentYear <= 2014 ? "Historical" : "SSP5-8.5"}</span>
+        </div>
+    `;
+
+    document.getElementById("sidebar").classList.remove("hidden");
+}
+
+document.getElementById("close-sidebar").addEventListener("click", () => {
+    document.getElementById("sidebar").classList.add("hidden");
+});
