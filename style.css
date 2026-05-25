@@ -1,0 +1,203 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background: #0f1117;
+    color: #e0e0e0;
+    min-height: 100vh;
+}
+
+#app {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+#header {
+    text-align: center;
+    padding: 30px 0 20px;
+}
+
+#header h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.5px;
+}
+
+#header p {
+    font-size: 1rem;
+    color: #888;
+    margin-top: 8px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#controls {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    justify-content: center;
+    padding: 16px 0;
+    flex-wrap: wrap;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.control-group label {
+    font-size: 0.85rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+#variable-toggle {
+    display: flex;
+    gap: 4px;
+    background: #1e2130;
+    padding: 4px;
+    border-radius: 8px;
+}
+
+.toggle-btn {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #888;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.toggle-btn.active {
+    background: #3a86ff;
+    color: white;
+    font-weight: 600;
+}
+
+#year-slider {
+    width: 400px;
+    accent-color: #3a86ff;
+}
+
+#year-display {
+    color: #3a86ff;
+    font-weight: 700;
+}
+
+#map-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin: 10px 0;
+}
+
+#map {
+    width: 100%;
+    max-width: 1100px;
+    height: 600px;
+}
+
+#legend {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin: 10px 0;
+}
+
+#legend-label {
+    font-size: 0.85rem;
+    color: #888;
+}
+
+#legend-svg {
+    width: 300px;
+    height: 40px;
+}
+
+#sidebar {
+    position: fixed;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #1e2130;
+    border: 1px solid #2a2d3e;
+    border-radius: 12px;
+    padding: 24px;
+    width: 260px;
+    z-index: 100;
+}
+
+#sidebar.hidden {
+    display: none;
+}
+
+#sidebar h2 {
+    font-size: 1.3rem;
+    color: #fff;
+    margin-bottom: 16px;
+}
+
+#state-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    font-size: 1.1rem;
+    color: #fff;
+    font-weight: 600;
+}
+
+#close-sidebar {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+#close-sidebar:hover {
+    color: #fff;
+}
+
+.state-path {
+    stroke: #000;
+    stroke-width: 0.5px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.state-path:hover {
+    opacity: 0.8;
+    stroke-width: 1.5px;
+}

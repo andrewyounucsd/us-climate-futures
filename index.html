@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>US Climate Futures</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/topojson@3/dist/topojson.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="header">
+            <h1>U.S. Climate Futures</h1>
+            <p>Explore how temperature and precipitation across the United States change under different emissions scenarios through 2100.</p>
+        </div>
+
+        <div id="controls">
+            <div class="control-group">
+                <label>Variable</label>
+                <div id="variable-toggle">
+                    <button class="toggle-btn active" data-var="temperature">Temperature</button>
+                    <button class="toggle-btn" data-var="precipitation">Precipitation</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Year: <span id="year-display">2000</span></label>
+                <input type="range" id="year-slider" min="1950" max="2100" value="2000" step="1">
+            </div>
+        </div>
+
+        <div id="map-container">
+            <svg id="map"></svg>
+        </div>
+
+        <div id="legend">
+            <div id="legend-label"></div>
+            <svg id="legend-svg"></svg>
+        </div>
+
+        <div id="sidebar" class="hidden">
+            <h2 id="state-name">State Name</h2>
+            <div id="state-stats"></div>
+            <button id="close-sidebar">✕</button>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>
