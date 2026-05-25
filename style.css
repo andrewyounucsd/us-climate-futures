@@ -201,3 +201,30 @@ body {
     opacity: 0.8;
     stroke-width: 1.5px;
 }
+
+#legend-note {
+    font-size: 0.75rem;
+    color: #666;
+    font-style: italic;
+    margin-top: 4px;
+    text-align: center;
+}
+
+#writeup {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+#writeup h2 {
+    font-size: 1.3rem;
+    color: #fff;
+    margin-bottom: 12px;
+}
+
+#writeup p {
+    font-size: 0.95rem;
+    color: #888;
+    line-height: 1.7;
+    margin-bottom: 16px;
+}

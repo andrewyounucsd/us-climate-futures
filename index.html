@@ -37,6 +37,29 @@
         <div id="legend">
             <div id="legend-label"></div>
             <svg id="legend-svg"></svg>
+            <p id="legend-note">Colors show change relative to each state's 1995–2014 average, not absolute temperature.</p>
+        </div>
+
+        <div id="writeup">
+            <h2>Project Progress</h2>
+            <p>
+                So far, we have built an interactive choropleth map of the United States that visualizes 
+                climate data from the NOAA CMIP6 dataset. The map displays state-level temperature anomalies 
+                and precipitation values sourced from the CESM2 climate model, spanning from 1950 to 2100 
+                only covering the SSP5-8.5 (worst case) emissions scenario for now. Users can explore how climate conditions 
+                change year by year using the slider, toggle between temperature and precipitation views, 
+                and click on any state to see detailed statistics including average temperature in Fahrenheit 
+                and warming since the 1995–2014 baseline.
+            </p>
+            <p>
+                The most challenging aspect of this project will be implementing the full suite of 
+                interactive features planned for the final version, particularly a comparison function and 
+                a focus mode, as well as implementing the other SSPs. Designing intuitive UI for switching between three distinct map modes 
+                (full US view, single state focus, and side-by-side comparison) while keeping all controls 
+                functional and the experience feeling seamless will require careful planning. Additionally, 
+                integrating a scrollytelling narrative introduction that guides the reader through the 
+                climate story before handing them control of the map will be a significant design challenge.
+            </p>
         </div>
 
         <div id="sidebar" class="hidden">
