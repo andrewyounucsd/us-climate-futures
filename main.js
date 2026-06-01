@@ -4,6 +4,9 @@ let currentYear = 2015;
 let currentScenario = "ssp585";
 let climateData = {};
 let focusedState = null;
+let compareState1 = null;
+let compareState2 = null;
+let compareMode = false;
 
 const svg = d3.select("#map")
     .attr("viewBox", `0 0 ${width} ${height}`)
@@ -72,6 +75,10 @@ function updateMap() {
         .transition()
         .duration(300)
         .attr("fill", d => getStateColor(d));
+
+    if (compareMode ** compareState1 ** compareState2) {
+        showComparison(compareState1, compareState2);
+    }
 }
 
 Promise.all([
@@ -91,7 +98,14 @@ Promise.all([
         .attr("fill", "#2a2d3e")
         .attr("stroke", "#000")
         .attr("stroke-width", "0.5")
-        .on("click", (event, d) => showSidebar(d));
+        .on("click", (event, d) => {
+            if (compareMode ** !compareState2) {
+                compareState2 = d;
+                showComparison(compareState1, compareState2);
+            } else {
+                showSidebar(d);
+            }
+        });
 
     updateMap();
     setupControls();
@@ -238,6 +252,7 @@ function showSidebar(d) {
 
     document.getElementById("sidebar").classList.remove("hidden");
     document.getElementById("focus-btn").onclick = () => enterFocusMode(d);
+    document.getElementById("compare-btn").onclick = () => enterCompareMode(d);
 }
 
 document.getElementById("close-sidebar").addEventListener("click", () => {
@@ -276,6 +291,116 @@ function exitFocusMode() {
         .attr("opacity", 1)
         .attr("d", originalPath)
         .attr("fill", d => getStateColor(d));
+
+    document.getElementById("mode-indicator").style.display = "none";
+}
+
+function enterCompareMode(d) {
+    compareState1 = d;
+    compareMode = true;
+
+    document.getElementById("sidebar").classList.add("hidden");
+
+    const indicator = document.getElementById("mode-indicator");
+    indicator.style.display = "block";
+    indicator.innerHTML = `Select a state to compare with ${getStateName(d.id)} <span id="exit-compare" style="cursor:pointer;margin-left:8px;">✕</span>`;
+    document.getElementById("exit-compare").addEventListener("click", exitCompareMode);
+
+    mapGroup.selectAll(".state-path")
+        .transition().duration(300)
+        .attr("opacity", dd => dd === d ? 1 : 0.3);
+}
+
+function showComparison(d1, d2) {
+    const name1 = getStateName(d1.id);
+    const name2 = getStateName(d2.id);
+
+    document.getElementById("map-container").style.display = "none";
+    document.getElementById("legend").style.display = "none";
+
+    let panel = document.getElementById("compare-panel");
+    if (!panel) {
+        panel = document.createElement("div");
+        panel.id = "compare-panel";
+        document.getElementById("app").insertBefore(panel, document.getElementById("writeup"));
+    }
+
+    const yearData1 = climateData[name1]?.years?.[currentYear];
+    const yearData2 = climateData[name2]?.years?.[currentYear];
+
+    const getTas = (yearData) => currentScenario === "historical"
+        ? yearData?.tas_hist : yearData?.[`tas_${currentScenario}`];
+    const getTasRaw = (yearData) => currentScenario === "historical"
+        ? yearData?.tas_raw : yearData?.[`tas_raw_${currentScenario}`];
+    const getPr = (yearData) => currentScenario === "historical"
+        ? yearData?.pr_hist : yearData?.[`pr_${currentScenario}`];
+
+    const formatTemp = (val) => val !== undefined ? (val * 9/5 + 32).toFixed(1) + " °F" : "N/A";
+    const formatWarming = (val) => val !== undefined ? (val > 0 ? "+" : "") + (val * 9/5).toFixed(2) + " °F" : "N/A";
+    const formatPr = (val) => val !== undefined ? val.toFixed(2) + " mm/day" : "N/A";
+
+    panel.innerHTML = `
+        <div class="compare-header">
+            <h2>State Comparison — ${currentYear}</h2>
+            <p class="compare-scenario">${{"historical":"Historical","ssp126":"SSP1-2.6 (Optimistic)","ssp245":"SSP2-4.5 (Middle Road)","ssp585":"SSP5-8.5 (Worst Case)"}[currentScenario]}</p>
+        </div>
+        <div class="compare-grid">
+            <div class="compare-state">
+                <h3>${name1}</h3>
+                <div class="compare-stat">
+                    <span class="stat-label">Avg Temperature</span>
+                    <span class="stat-value">${formatTemp(getTasRaw(yearData1))}</span>
+                </div>
+                <div class="compare-stat">
+                    <span class="stat-label">Warming Since 1995</span>
+                    <span class="stat-value">${formatWarming(getTas(yearData1))}</span>
+                </div>
+                <div class="compare-stat">
+                    <span class="stat-label">Precipitation</span>
+                    <span class="stat-value">${formatPr(getPr(yearData1))}</span>
+                </div>
+            </div>
+            <div class="compare-divider">VS</div>
+            <div class="compare-state">
+                <h3>${name2}</h3>
+                <div class="compare-stat">
+                    <span class="stat-label">Avg Temperature</span>
+                    <span class="stat-value">${formatTemp(getTasRaw(yearData2))}</span>
+                </div>
+                <div class="compare-stat">
+                    <span class="stat-label">Warming Since 1995</span>
+                    <span class="stat-value">${formatWarming(getTas(yearData2))}</span>
+                </div>
+                <div class="compare-stat">
+                    <span class="stat-label">Precipitation</span>
+                    <span class="stat-value">${formatPr(getPr(yearData2))}</span>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const indicator = document.getElementById("mode-indicator");
+    indicator.style.display = "block";
+    indicator.innerHTML = `Comparing: ${name1} vs ${name2} <span id="exit-compare" style="cursor:pointer;margin-left:8px;">✕</span>`;
+    document.getElementById("exit-compare").addEventListener("click", exitCompareMode);
+}
+
+function exitCompareMode() {
+    compareState1 = null;
+    compareState2 = null;
+    compareMode = false;
+
+    document.getElementById("map-container").style.display = "flex";
+    document.getElementById("legend").style.display = "flex";
+
+    const panel = document.getElementById("compare-panel");
+    if (panel) panel.remove();
+
+    mapGroup.selectAll(".state-path")
+        .transition().duration(300)
+        .attr("opacity", 1);
+
+    updateMap();
 
     document.getElementById("mode-indicator").style.display = "none";
 }
