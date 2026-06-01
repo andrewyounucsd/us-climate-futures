@@ -400,9 +400,8 @@ function exitCompareMode() {
 
     mapGroup.selectAll(".state-path")
         .transition().duration(300)
-        .attr("opacity", 1);
-
-    updateMap();
+        .attr("opacity", 1)
+        .attr("fill", d => getStateColor(d));
 
     document.getElementById("mode-indicator").style.display = "none";
     document.getElementById("reset-bar").classList.add("hidden");

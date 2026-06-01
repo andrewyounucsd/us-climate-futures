@@ -360,3 +360,30 @@ body {
     gap: 2px;
     margin-bottom: 12px;
 }
+
+#reset-bar {
+    display: flex;
+    justify-content: center;
+    margin: 8px 0;
+}
+
+#reset-bar.hidden {
+    display: none;
+}
+
+#reset-btn {
+    padding: 8px 20px;
+    background: transparent;
+    color: #ff6b6b;
+    border: 1px solid #ff6b6b;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+#reset-btn:hover {
+    background: #ff6b6b;
+    color: white;
+}
