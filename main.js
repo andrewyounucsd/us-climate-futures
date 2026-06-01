@@ -1,6 +1,6 @@
 const width = 960, height = 560;
 let currentVar = "temperature";
-let currentYear = 2000;
+let currentYear = 2015;
 let currentScenario = "ssp585";
 let climateData = {};
 
@@ -104,6 +104,7 @@ function setupControls() {
     sspSelect.addEventListener("change", () => {
         currentScenario = sspSelect.value;
         if (currentScenario === "historical") {
+            slider.min = 1950;
             slider.max = 2014;
             if (currentYear > 2014) {
                 currentYear = 2014;
@@ -111,7 +112,13 @@ function setupControls() {
                 yearDisplay.textContent = 2014;
             }
         } else {
+            slider.min = 2015;
             slider.max = 2100;
+            if (currentYear < 2015) {
+                currentYear = 2015;
+                slider.value = 2015;
+                yearDisplay.textContent = 2015;
+            }
         }
         updateMap();
     });
