@@ -274,9 +274,8 @@ function exitFocusMode() {
     mapGroup.selectAll(".state-path")
         .transition().duration(600)
         .attr("opacity", 1)
-        .attr("d", originalPath);
-
-    setTimeout(() => updateMap(), 300);
+        .attr("d", originalPath)
+        .attr("fill", d => getStateColor(d));
 
     document.getElementById("mode-indicator").style.display = "none";
 }
