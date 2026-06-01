@@ -243,3 +243,40 @@ body {
 #ssp-select:hover {
     border-color: #3a86ff;
 }
+
+#focus-btn {
+    width: 100%;
+    margin-top: 16px;
+    padding: 10px;
+    background: #3a86ff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+#focus-btn:hover {
+    background: #2563eb;
+}
+
+#mode-indicator {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: #1e2130;
+    border: 1px solid #3a86ff;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    color: #3a86ff;
+    font-weight: 600;
+    display: none;
+    z-index: 10;
+}
+
+#map-container {
+    position: relative;
+}
