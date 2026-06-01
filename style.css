@@ -228,3 +228,18 @@ body {
     line-height: 1.7;
     margin-bottom: 16px;
 }
+
+#ssp-select {
+    background: #1e2130;
+    color: #e0e0e0;
+    border: 1px solid #2a2d3e;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    outline: none;
+}
+
+#ssp-select:hover {
+    border-color: #3a86ff;
+}

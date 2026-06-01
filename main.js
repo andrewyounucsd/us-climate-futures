@@ -1,6 +1,7 @@
 const width = 960, height = 560;
 let currentVar = "temperature";
 let currentYear = 2000;
+let currentScenario = "ssp585";
 let climateData = {};
 
 const svg = d3.select("#map")
@@ -52,11 +53,15 @@ function getStateColor(d) {
     if (!yearData) return "#2a2d3e";
 
     if (currentVar === "temperature") {
-        const val = yearData.tas_hist ?? yearData.tas_ssp585;
+        const val = currentScenario === "historical" 
+            ? yearData.tas_hist 
+            : yearData[`tas_${currentScenario}`];
         if (val === undefined) return "#2a2d3e";
         return tempScale(val);
     } else {
-        const val = yearData.pr_hist ?? yearData.pr_ssp585;
+        const val = currentScenario === "historical"
+            ? yearData.pr_hist
+            : yearData[`pr_${currentScenario}`];
         return val !== undefined ? precipScale(val) : "#2a2d3e";
     }
 }
@@ -95,6 +100,21 @@ Promise.all([
 function setupControls() {
     const slider = document.getElementById("year-slider");
     const yearDisplay = document.getElementById("year-display");
+    const sspSelect = document.getElementById("ssp-select");
+    sspSelect.addEventListener("change", () => {
+        currentScenario = sspSelect.value;
+        if (currentScenario === "historical") {
+            slider.max = 2014;
+            if (currentYear > 2014) {
+                currentYear = 2014;
+                slider.value = 2014;
+                yearDisplay.textContent = 2014;
+            }
+        } else {
+            slider.max = 2100;
+        }
+        updateMap();
+    });
 
     slider.addEventListener("input", () => {
         currentYear = +slider.value;
@@ -163,12 +183,26 @@ function showSidebar(d) {
     if (!stateName) return;
 
     const yearData = climateData[stateName]?.years?.[currentYear];
-    const tas = yearData?.tas_hist ?? yearData?.tas_ssp585;
-    const tasRaw = yearData?.tas_raw;
-    const pr = yearData?.pr_hist ?? yearData?.pr_ssp585;
+    
+    const tas = currentScenario === "historical"
+        ? yearData?.tas_hist
+        : yearData?.[`tas_${currentScenario}`];
+    const tasRaw = currentScenario === "historical"
+        ? yearData?.tas_raw
+        : yearData?.[`tas_raw_${currentScenario}`];
+    const pr = currentScenario === "historical"
+        ? yearData?.pr_hist
+        : yearData?.[`pr_${currentScenario}`];
 
     const tasRaw_F = tasRaw !== undefined ? (tasRaw * 9/5 + 32).toFixed(1) : null;
     const tas_F = tas !== undefined ? (tas * 9/5).toFixed(2) : null;
+
+    const scenarioLabels = {
+        "historical": "Historical",
+        "ssp126": "SSP1-2.6 (Optimistic)",
+        "ssp245": "SSP2-4.5 (Middle Road)",
+        "ssp585": "SSP5-8.5 (Worst Case)"
+    };
 
     document.getElementById("state-name").textContent = stateName;
     document.getElementById("state-stats").innerHTML = `
@@ -190,7 +224,7 @@ function showSidebar(d) {
         </div>
         <div class="stat-item">
             <span class="stat-label">Scenario</span>
-            <span class="stat-value">${currentYear <= 2014 ? "Historical" : "SSP5-8.5"}</span>
+            <span class="stat-value">${scenarioLabels[currentScenario]}</span>
         </div>
     `;
 

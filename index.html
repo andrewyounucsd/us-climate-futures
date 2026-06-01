@@ -25,6 +25,16 @@
             </div>
 
             <div class="control-group">
+                <label>Scenario</label>
+                <select id="ssp-select">
+                    <option value="historical">Historical (1950–2014)</option>
+                    <option value="ssp126">SSP1-2.6 (Optimistic)</option>
+                    <option value="ssp245">SSP2-4.5 (Middle Road)</option>
+                    <option value="ssp585" selected>SSP5-8.5 (Worst Case)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
                 <label>Year: <span id="year-display">2000</span></label>
                 <input type="range" id="year-slider" min="1950" max="2100" value="2000" step="1">
             </div>
