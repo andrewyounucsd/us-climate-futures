@@ -3,6 +3,7 @@ let currentVar = "temperature";
 let currentYear = 2015;
 let currentScenario = "ssp585";
 let climateData = {};
+let focusedState = null;
 
 const svg = d3.select("#map")
     .attr("viewBox", `0 0 ${width} ${height}`)
@@ -236,8 +237,46 @@ function showSidebar(d) {
     `;
 
     document.getElementById("sidebar").classList.remove("hidden");
+    document.getElementById("focus-btn").onclick = () => enterFocusMode(d);
 }
 
 document.getElementById("close-sidebar").addEventListener("click", () => {
     document.getElementById("sidebar").classList.add("hidden");
 });
+
+function enterFocusMode(d) {
+    focusedState = d;
+    const stateName = getStateName(d.id);
+
+    const stateFeature = {type: "FeatureCollection", features: [d]};
+    const newProjection = d3.geoAlbersUsa()
+        .fitExtent([[20, 20], [width - 20, height - 20]], stateFeature);
+    const newPath = d3.geoPath().projection(newProjection);
+
+    mapGroup.selectAll(".state-path")
+        .transition().duration(600)
+        .attr("opacity", dd => getStateName(dd.id) === stateName ? 1 : 0)
+        .attr("d", newPath);
+
+    const indicator = document.getElementById("mode-indicator");
+    indicator.style.display = "block";
+    indicator.innerHTML = `Focus: ${stateName} <span id="exit-focus" style="cursor:pointer;margin-left:8px;">✕</span>`;
+    document.getElementById("exit-focus").addEventListener("click", exitFocusMode);
+
+    document.getElementById("sidebar").classList.add("hidden");
+}
+
+function exitFocusMode() {
+    focusedState = null;
+
+    const originalPath = d3.geoPath().projection(projection);
+
+    mapGroup.selectAll(".state-path")
+        .transition().duration(600)
+        .attr("opacity", 1)
+        .attr("d", originalPath);
+
+    setTimeout(() => updateMap(), 300);
+
+    document.getElementById("mode-indicator").style.display = "none";
+}
