@@ -57,8 +57,8 @@ function getStateColor(d) {
     if (!yearData) return "#2a2d3e";
 
     if (currentVar === "temperature") {
-        const val = currentScenario === "historical" 
-            ? yearData.tas_hist 
+        const val = currentScenario === "historical"
+            ? yearData.tas_hist
             : yearData[`tas_${currentScenario}`];
         if (val === undefined) return "#2a2d3e";
         return tempScale(val);
@@ -76,8 +76,8 @@ function updateMap() {
         .duration(300)
         .attr("fill", d => getStateColor(d));
 
-    if (compareMode ** compareState1 ** compareState2) {
-        showComparison(compareState1, compareState2);
+    if (compareMode && compareState1 && compareState2) {
+        renderComparePanel();
     }
 }
 
@@ -99,9 +99,9 @@ Promise.all([
         .attr("stroke", "#000")
         .attr("stroke-width", "0.5")
         .on("click", (event, d) => {
-            if (compareMode ** !compareState2) {
+            if (compareMode && !compareState2) {
                 compareState2 = d;
-                showComparison(compareState1, compareState2);
+                renderComparePanel();
             } else {
                 showSidebar(d);
             }
@@ -116,6 +116,7 @@ function setupControls() {
     const slider = document.getElementById("year-slider");
     const yearDisplay = document.getElementById("year-display");
     const sspSelect = document.getElementById("ssp-select");
+
     sspSelect.addEventListener("change", () => {
         currentScenario = sspSelect.value;
         if (currentScenario === "historical") {
@@ -152,6 +153,11 @@ function setupControls() {
             updateMap();
             drawLegend();
         });
+    });
+
+    document.getElementById("reset-btn").addEventListener("click", () => {
+        if (compareMode) exitCompareMode();
+        else if (focusedState) exitFocusMode();
     });
 }
 
@@ -205,7 +211,7 @@ function showSidebar(d) {
     if (!stateName) return;
 
     const yearData = climateData[stateName]?.years?.[currentYear];
-    
+
     const tas = currentScenario === "historical"
         ? yearData?.tas_hist
         : yearData?.[`tas_${currentScenario}`];
@@ -273,17 +279,14 @@ function enterFocusMode(d) {
         .attr("opacity", dd => getStateName(dd.id) === stateName ? 1 : 0)
         .attr("d", newPath);
 
-    const indicator = document.getElementById("mode-indicator");
-    indicator.style.display = "block";
-    indicator.innerHTML = `Focus: ${stateName} <span id="exit-focus" style="cursor:pointer;margin-left:8px;">✕</span>`;
-    document.getElementById("exit-focus").addEventListener("click", exitFocusMode);
-
+    document.getElementById("mode-indicator").style.display = "block";
+    document.getElementById("mode-indicator").innerHTML = `Focus: ${stateName}`;
     document.getElementById("sidebar").classList.add("hidden");
+    document.getElementById("reset-bar").classList.remove("hidden");
 }
 
 function exitFocusMode() {
     focusedState = null;
-
     const originalPath = d3.geoPath().projection(projection);
 
     mapGroup.selectAll(".state-path")
@@ -293,6 +296,7 @@ function exitFocusMode() {
         .attr("fill", d => getStateColor(d));
 
     document.getElementById("mode-indicator").style.display = "none";
+    document.getElementById("reset-bar").classList.add("hidden");
 }
 
 function enterCompareMode(d) {
@@ -300,49 +304,52 @@ function enterCompareMode(d) {
     compareMode = true;
 
     document.getElementById("sidebar").classList.add("hidden");
-
-    const indicator = document.getElementById("mode-indicator");
-    indicator.style.display = "block";
-    indicator.innerHTML = `Select a state to compare with ${getStateName(d.id)} <span id="exit-compare" style="cursor:pointer;margin-left:8px;">✕</span>`;
-    document.getElementById("exit-compare").addEventListener("click", exitCompareMode);
+    document.getElementById("mode-indicator").style.display = "block";
+    document.getElementById("mode-indicator").innerHTML = `Select a state to compare with ${getStateName(d.id)}`;
+    document.getElementById("reset-bar").classList.remove("hidden");
 
     mapGroup.selectAll(".state-path")
         .transition().duration(300)
         .attr("opacity", dd => dd === d ? 1 : 0.3);
 }
 
-function showComparison(d1, d2) {
-    const name1 = getStateName(d1.id);
-    const name2 = getStateName(d2.id);
+function renderComparePanel() {
+    const name1 = getStateName(compareState1.id);
+    const name2 = getStateName(compareState2.id);
 
-    document.getElementById("map-container").style.display = "none";
-    document.getElementById("legend").style.display = "none";
+    const yearData1 = climateData[name1]?.years?.[currentYear];
+    const yearData2 = climateData[name2]?.years?.[currentYear];
+
+    const getTas = (yd) => currentScenario === "historical" ? yd?.tas_hist : yd?.[`tas_${currentScenario}`];
+    const getTasRaw = (yd) => currentScenario === "historical" ? yd?.tas_raw : yd?.[`tas_raw_${currentScenario}`];
+    const getPr = (yd) => currentScenario === "historical" ? yd?.pr_hist : yd?.[`pr_${currentScenario}`];
+
+    const formatTemp = (val) => val !== undefined ? (val * 9/5 + 32).toFixed(1) + " °F" : "N/A";
+    const formatWarming = (val) => val !== undefined ? (val > 0 ? "+" : "") + (val * 9/5).toFixed(2) + " °F" : "N/A";
+    const formatPr = (val) => val !== undefined ? val.toFixed(2) + " mm/day" : "N/A";
+
+    const scenarioLabels = {
+        "historical": "Historical",
+        "ssp126": "SSP1-2.6 (Optimistic)",
+        "ssp245": "SSP2-4.5 (Middle Road)",
+        "ssp585": "SSP5-8.5 (Worst Case)"
+    };
 
     let panel = document.getElementById("compare-panel");
     if (!panel) {
         panel = document.createElement("div");
         panel.id = "compare-panel";
         document.getElementById("app").insertBefore(panel, document.getElementById("writeup"));
+        document.getElementById("map-container").style.display = "none";
+        document.getElementById("legend").style.display = "none";
     }
 
-    const yearData1 = climateData[name1]?.years?.[currentYear];
-    const yearData2 = climateData[name2]?.years?.[currentYear];
-
-    const getTas = (yearData) => currentScenario === "historical"
-        ? yearData?.tas_hist : yearData?.[`tas_${currentScenario}`];
-    const getTasRaw = (yearData) => currentScenario === "historical"
-        ? yearData?.tas_raw : yearData?.[`tas_raw_${currentScenario}`];
-    const getPr = (yearData) => currentScenario === "historical"
-        ? yearData?.pr_hist : yearData?.[`pr_${currentScenario}`];
-
-    const formatTemp = (val) => val !== undefined ? (val * 9/5 + 32).toFixed(1) + " °F" : "N/A";
-    const formatWarming = (val) => val !== undefined ? (val > 0 ? "+" : "") + (val * 9/5).toFixed(2) + " °F" : "N/A";
-    const formatPr = (val) => val !== undefined ? val.toFixed(2) + " mm/day" : "N/A";
+    document.getElementById("mode-indicator").innerHTML = `Comparing: ${name1} vs ${name2}`;
 
     panel.innerHTML = `
         <div class="compare-header">
             <h2>State Comparison — ${currentYear}</h2>
-            <p class="compare-scenario">${{"historical":"Historical","ssp126":"SSP1-2.6 (Optimistic)","ssp245":"SSP2-4.5 (Middle Road)","ssp585":"SSP5-8.5 (Worst Case)"}[currentScenario]}</p>
+            <p class="compare-scenario">${scenarioLabels[currentScenario]}</p>
         </div>
         <div class="compare-grid">
             <div class="compare-state">
@@ -378,11 +385,6 @@ function showComparison(d1, d2) {
             </div>
         </div>
     `;
-
-    const indicator = document.getElementById("mode-indicator");
-    indicator.style.display = "block";
-    indicator.innerHTML = `Comparing: ${name1} vs ${name2} <span id="exit-compare" style="cursor:pointer;margin-left:8px;">✕</span>`;
-    document.getElementById("exit-compare").addEventListener("click", exitCompareMode);
 }
 
 function exitCompareMode() {
@@ -403,4 +405,5 @@ function exitCompareMode() {
     updateMap();
 
     document.getElementById("mode-indicator").style.display = "none";
+    document.getElementById("reset-bar").classList.add("hidden");
 }
