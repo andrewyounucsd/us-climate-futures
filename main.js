@@ -7,6 +7,7 @@ let focusedState = null;
 let compareState1 = null;
 let compareState2 = null;
 let compareMode = false;
+let selectedState = null;
 
 const svg = d3.select("#map")
     .attr("viewBox", `0 0 ${width} ${height}`)
@@ -79,6 +80,10 @@ function updateMap() {
     if (compareMode && compareState1 && compareState2) {
         renderComparePanel();
     }
+
+    if (selectedState && !document.getElementById("sidebar").classList.contains("hidden")) {
+        showSidebar(selectedState);
+}
 }
 
 Promise.all([
@@ -207,6 +212,7 @@ function drawLegend() {
 }
 
 function showSidebar(d) {
+    selectedState = d;
     const stateName = getStateName(d.id);
     if (!stateName) return;
 
@@ -263,6 +269,7 @@ function showSidebar(d) {
 
 document.getElementById("close-sidebar").addEventListener("click", () => {
     document.getElementById("sidebar").classList.add("hidden");
+    selectedState = null;
 });
 
 function enterFocusMode(d) {
