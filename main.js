@@ -2,12 +2,17 @@ const width = 960, height = 560;
 let currentVar = "temperature";
 let currentYear = 2015;
 let currentScenario = "ssp585";
+let currentMonth = null;
 let climateData = {};
+let monthlyData = {};
 let focusedState = null;
 let compareState1 = null;
 let compareState2 = null;
 let compareMode = false;
 let selectedState = null;
+
+const monthNames = ["January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"];
 
 const svg = d3.select("#map")
     .attr("viewBox", `0 0 ${width} ${height}`)
@@ -50,11 +55,19 @@ function getStateName(id) {
     return stateIdToName[String(id).padStart(2, "0")];
 }
 
+function getYearData(stateName) {
+    if (currentMonth !== null) {
+        const key = `${currentYear}-${String(currentMonth).padStart(2, "0")}`;
+        return monthlyData[stateName]?.months?.[key];
+    }
+    return climateData[stateName]?.years?.[currentYear];
+}
+
 function getStateColor(d) {
     const stateName = getStateName(d.id);
-    if (!stateName || !climateData[stateName]) return "#2a2d3e";
+    if (!stateName) return "#2a2d3e";
 
-    const yearData = climateData[stateName]?.years?.[currentYear];
+    const yearData = getYearData(stateName);
     if (!yearData) return "#2a2d3e";
 
     if (currentVar === "temperature") {
@@ -83,14 +96,16 @@ function updateMap() {
 
     if (selectedState && !document.getElementById("sidebar").classList.contains("hidden")) {
         showSidebar(selectedState);
-}
+    }
 }
 
 Promise.all([
     d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json"),
-    d3.json("data/climate_data.json")
-]).then(([us, climate]) => {
+    d3.json("data/climate_data.json"),
+    d3.json("data/climate_data_monthly.json")
+]).then(([us, climate, monthly]) => {
     climateData = climate;
+    monthlyData = monthly;
 
     const states = topojson.feature(us, us.objects.states);
 
@@ -120,36 +135,70 @@ Promise.all([
 function setupControls() {
     const slider = document.getElementById("year-slider");
     const yearDisplay = document.getElementById("year-display");
+    const yearInput = document.getElementById("year-input");
     const sspSelect = document.getElementById("ssp-select");
 
+    // SSP dropdown
     sspSelect.addEventListener("change", () => {
         currentScenario = sspSelect.value;
         if (currentScenario === "historical") {
             slider.min = 1950;
             slider.max = 2014;
+            yearInput.min = 1950;
+            yearInput.max = 2014;
             if (currentYear > 2014) {
                 currentYear = 2014;
                 slider.value = 2014;
+                yearInput.value = 2014;
                 yearDisplay.textContent = 2014;
             }
         } else {
             slider.min = 2015;
             slider.max = 2100;
+            yearInput.min = 2015;
+            yearInput.max = 2100;
             if (currentYear < 2015) {
                 currentYear = 2015;
                 slider.value = 2015;
+                yearInput.value = 2015;
                 yearDisplay.textContent = 2015;
             }
         }
         updateMap();
     });
 
+    // Year slider
     slider.addEventListener("input", () => {
         currentYear = +slider.value;
         yearDisplay.textContent = currentYear;
+        yearInput.value = currentYear;
         updateMap();
     });
 
+    // Year text input
+    yearInput.addEventListener("change", () => {
+        const min = currentScenario === "historical" ? 1950 : 2015;
+        const max = currentScenario === "historical" ? 2014 : 2100;
+        let val = Math.max(min, Math.min(max, parseInt(yearInput.value) || currentYear));
+        currentYear = val;
+        yearInput.value = val;
+        slider.value = val;
+        yearDisplay.textContent = val;
+        updateMap();
+    });
+
+    // Month picker
+    document.querySelectorAll(".month-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            document.querySelectorAll(".month-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            const month = +btn.dataset.month;
+            currentMonth = month === 0 ? null : month;
+            updateMap();
+        });
+    });
+
+    // Variable toggle
     document.querySelectorAll(".toggle-btn").forEach(btn => {
         btn.addEventListener("click", () => {
             document.querySelectorAll(".toggle-btn").forEach(b => b.classList.remove("active"));
@@ -160,6 +209,7 @@ function setupControls() {
         });
     });
 
+    // Reset button
     document.getElementById("reset-btn").addEventListener("click", () => {
         if (compareMode) exitCompareMode();
         else if (focusedState) exitFocusMode();
@@ -212,11 +262,11 @@ function drawLegend() {
 }
 
 function showSidebar(d) {
-    selectedState = d;
     const stateName = getStateName(d.id);
     if (!stateName) return;
 
-    const yearData = climateData[stateName]?.years?.[currentYear];
+    selectedState = d;
+    const yearData = getYearData(stateName);
 
     const tas = currentScenario === "historical"
         ? yearData?.tas_hist
@@ -238,6 +288,8 @@ function showSidebar(d) {
         "ssp585": "SSP5-8.5 (Worst Case)"
     };
 
+    const monthLabel = currentMonth !== null ? monthNames[currentMonth - 1] : "Annual";
+
     document.getElementById("state-name").textContent = stateName;
     document.getElementById("state-stats").innerHTML = `
         <div class="stat-item">
@@ -254,7 +306,7 @@ function showSidebar(d) {
         </div>
         <div class="stat-item">
             <span class="stat-label">Year</span>
-            <span class="stat-value">${currentYear}</span>
+            <span class="stat-value">${currentYear} — ${monthLabel}</span>
         </div>
         <div class="stat-item">
             <span class="stat-label">Scenario</span>
@@ -324,8 +376,8 @@ function renderComparePanel() {
     const name1 = getStateName(compareState1.id);
     const name2 = getStateName(compareState2.id);
 
-    const yearData1 = climateData[name1]?.years?.[currentYear];
-    const yearData2 = climateData[name2]?.years?.[currentYear];
+    const yearData1 = getYearData(name1);
+    const yearData2 = getYearData(name2);
 
     const getTas = (yd) => currentScenario === "historical" ? yd?.tas_hist : yd?.[`tas_${currentScenario}`];
     const getTasRaw = (yd) => currentScenario === "historical" ? yd?.tas_raw : yd?.[`tas_raw_${currentScenario}`];
@@ -342,6 +394,8 @@ function renderComparePanel() {
         "ssp585": "SSP5-8.5 (Worst Case)"
     };
 
+    const monthLabel = currentMonth !== null ? monthNames[currentMonth - 1] : "Annual";
+
     let panel = document.getElementById("compare-panel");
     if (!panel) {
         panel = document.createElement("div");
@@ -355,7 +409,7 @@ function renderComparePanel() {
 
     panel.innerHTML = `
         <div class="compare-header">
-            <h2>State Comparison — ${currentYear}</h2>
+            <h2>State Comparison — ${currentYear} (${monthLabel})</h2>
             <p class="compare-scenario">${scenarioLabels[currentScenario]}</p>
         </div>
         <div class="compare-grid">

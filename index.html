@@ -36,7 +36,29 @@
 
             <div class="control-group">
                 <label>Year: <span id="year-display">2015</span></label>
-                <input type="range" id="year-slider" min="2015" max="2100" value="2015" step="1">
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <input type="range" id="year-slider" min="2015" max="2100" value="2015" step="1">
+                    <input type="number" id="year-input" min="2015" max="2100" value="2015">
+                </div>
+            </div>
+
+            <div class="control-group" id="month-control">
+                <label>Month</label>
+                <div id="month-picker">
+                    <button class="month-btn active" data-month="0">Annual</button>
+                    <button class="month-btn" data-month="1">Jan</button>
+                    <button class="month-btn" data-month="2">Feb</button>
+                    <button class="month-btn" data-month="3">Mar</button>
+                    <button class="month-btn" data-month="4">Apr</button>
+                    <button class="month-btn" data-month="5">May</button>
+                    <button class="month-btn" data-month="6">Jun</button>
+                    <button class="month-btn" data-month="7">Jul</button>
+                    <button class="month-btn" data-month="8">Aug</button>
+                    <button class="month-btn" data-month="9">Sep</button>
+                    <button class="month-btn" data-month="10">Oct</button>
+                    <button class="month-btn" data-month="11">Nov</button>
+                    <button class="month-btn" data-month="12">Dec</button>
+                </div>
             </div>
         </div>
 
@@ -61,19 +83,20 @@
                 So far, we have built an interactive choropleth map of the United States that visualizes 
                 climate data from the NOAA CMIP6 dataset. The map displays state-level temperature anomalies 
                 and precipitation values sourced from the CESM2 climate model, spanning from 1950 to 2100 
-                only covering the SSP5-8.5 (worst case) emissions scenario for now. Users can explore how climate conditions 
-                change year by year using the slider, toggle between temperature and precipitation views, 
-                and click on any state to see detailed statistics including average temperature in Fahrenheit 
-                and warming since the 1995–2014 baseline.
+                under all three SSP emissions scenarios. Users can explore how climate conditions change year 
+                by year using the slider, toggle between temperature and precipitation views, select specific 
+                months to see seasonal variation, and click on any state to see detailed statistics including 
+                average temperature in Fahrenheit and warming since the 1995–2014 baseline.
             </p>
             <p>
                 The most challenging aspect of this project will be implementing the full suite of 
-                interactive features planned for the final version, particularly a comparison function and 
-                a focus mode, as well as implementing the other SSPs. Designing intuitive UI for switching between three distinct map modes 
-                (full US view, single state focus, and side-by-side comparison) while keeping all controls 
-                functional and the experience feeling seamless will require careful planning. Additionally, 
-                integrating a scrollytelling narrative introduction that guides the reader through the 
-                climate story before handing them control of the map will be a significant design challenge.
+                interactive features planned for the final version, particularly a scrollytelling narrative 
+                introduction and polished visual design. Designing intuitive UI for switching between three 
+                distinct map modes (full US view, single state focus, and side-by-side comparison) while 
+                keeping all controls functional and the experience feeling seamless will require careful 
+                planning. Additionally, integrating a scrollytelling narrative introduction that guides the 
+                reader through the climate story before handing them control of the map will be a significant 
+                design challenge.
             </p>
         </div>
 
@@ -81,8 +104,8 @@
             <h2 id="state-name">State Name</h2>
             <div id="state-stats"></div>
             <button id="focus-btn">Focus on this state</button>
-            <button id="close-sidebar">✕</button>
             <button id="compare-btn">Compare with another state</button>
+            <button id="close-sidebar">✕</button>
         </div>
     </div>
 
