@@ -99,6 +99,21 @@ function updateMap() {
     }
 }
 
+// Create tooltip first
+const tooltip = d3.select("body").append("div")
+    .attr("id", "map-tooltip")
+    .style("position", "absolute")
+    .style("background", "#1e2130")
+    .style("border", "1px solid #3a86ff")
+    .style("border-radius", "8px")
+    .style("padding", "8px 14px")
+    .style("font-size", "0.85rem")
+    .style("color", "#fff")
+    .style("font-weight", "600")
+    .style("pointer-events", "none")
+    .style("display", "none")
+    .style("z-index", "200");
+
 Promise.all([
     d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json"),
     d3.json("data/climate_data.json"),
@@ -118,6 +133,20 @@ Promise.all([
         .attr("fill", "#2a2d3e")
         .attr("stroke", "#000")
         .attr("stroke-width", "0.5")
+        .on("mouseover", (event, d) => {
+            const stateName = getStateName(d.id);
+            if (stateName) {
+                tooltip.style("display", "block").text(stateName);
+            }
+        })
+        .on("mousemove", (event) => {
+            tooltip
+                .style("left", (event.pageX + 12) + "px")
+                .style("top", (event.pageY - 28) + "px");
+        })
+        .on("mouseout", () => {
+            tooltip.style("display", "none");
+        })
         .on("click", (event, d) => {
             if (compareMode && !compareState2) {
                 compareState2 = d;
