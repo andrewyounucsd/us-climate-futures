@@ -138,7 +138,6 @@ function setupControls() {
     const yearInput = document.getElementById("year-input");
     const sspSelect = document.getElementById("ssp-select");
 
-    // SSP dropdown
     sspSelect.addEventListener("change", () => {
         currentScenario = sspSelect.value;
         if (currentScenario === "historical") {
@@ -167,7 +166,6 @@ function setupControls() {
         updateMap();
     });
 
-    // Year slider
     slider.addEventListener("input", () => {
         currentYear = +slider.value;
         yearDisplay.textContent = currentYear;
@@ -175,7 +173,6 @@ function setupControls() {
         updateMap();
     });
 
-    // Year text input
     yearInput.addEventListener("change", () => {
         const min = currentScenario === "historical" ? 1950 : 2015;
         const max = currentScenario === "historical" ? 2014 : 2100;
@@ -187,7 +184,6 @@ function setupControls() {
         updateMap();
     });
 
-    // Month picker
     document.querySelectorAll(".month-btn").forEach(btn => {
         btn.addEventListener("click", () => {
             document.querySelectorAll(".month-btn").forEach(b => b.classList.remove("active"));
@@ -195,10 +191,10 @@ function setupControls() {
             const month = +btn.dataset.month;
             currentMonth = month === 0 ? null : month;
             updateMap();
+            drawLegend();
         });
     });
 
-    // Variable toggle
     document.querySelectorAll(".toggle-btn").forEach(btn => {
         btn.addEventListener("click", () => {
             document.querySelectorAll(".toggle-btn").forEach(b => b.classList.remove("active"));
@@ -209,7 +205,6 @@ function setupControls() {
         });
     });
 
-    // Reset button
     document.getElementById("reset-btn").addEventListener("click", () => {
         if (compareMode) exitCompareMode();
         else if (focusedState) exitFocusMode();
@@ -225,7 +220,9 @@ function drawLegend() {
     const grad = defs.append("linearGradient").attr("id", "legend-grad");
 
     if (currentVar === "temperature") {
-        document.getElementById("legend-label").textContent = "Temperature Anomaly: yellow = cooler, red = hotter";
+        document.getElementById("legend-label").textContent = currentMonth !== null 
+            ? `Temperature Anomaly (${monthNames[currentMonth - 1]}): yellow = cooler, red = hotter`
+            : "Temperature Anomaly (Annual avg): yellow = cooler, red = hotter";
         d3.range(0, 1.01, 0.1).forEach(t => {
             grad.append("stop")
                 .attr("offset", `${t * 100}%`)
