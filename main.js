@@ -294,7 +294,7 @@ function showSidebar(d) {
             <span class="stat-value">${tasRaw_F !== null ? tasRaw_F + " °F" : "N/A"}</span>
         </div>
         <div class="stat-item">
-            <span class="stat-label">Warming Since 1995</span>
+            <span class="stat-label">${currentMonth !== null ? `Warming vs avg ${monthNames[currentMonth - 1]}` : "Warming Since 1995"}</span>
             <span class="stat-value">${tas_F !== null ? (tas > 0 ? "+" : "") + tas_F + " °F" : "N/A"}</span>
         </div>
         <div class="stat-item">
@@ -417,7 +417,7 @@ function renderComparePanel() {
                     <span class="stat-value">${formatTemp(getTasRaw(yearData1))}</span>
                 </div>
                 <div class="compare-stat">
-                    <span class="stat-label">Warming Since 1995</span>
+                    <span class="stat-label">${currentMonth !== null ? `Warming vs avg ${monthNames[currentMonth - 1]}` : "Warming Since 1995"}</span>
                     <span class="stat-value">${formatWarming(getTas(yearData1))}</span>
                 </div>
                 <div class="compare-stat">
@@ -433,7 +433,7 @@ function renderComparePanel() {
                     <span class="stat-value">${formatTemp(getTasRaw(yearData2))}</span>
                 </div>
                 <div class="compare-stat">
-                    <span class="stat-label">Warming Since 1995</span>
+                    <span class="stat-label">${currentMonth !== null ? `Warming vs avg ${monthNames[currentMonth - 1]}` : "Warming Since 1995"}</span>
                     <span class="stat-value">${formatWarming(getTas(yearData2))}</span>
                 </div>
                 <div class="compare-stat">
