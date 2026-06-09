@@ -35,6 +35,11 @@ const precipScale = d3.scaleSequential()
     .interpolator(d3.interpolateBlues)
     .clamp(true);
 
+const humidityScale = d3.scaleSequential()
+    .domain([30, 90])
+    .interpolator(d3.interpolatePurples)
+    .clamp(true);
+
 const stateIdToName = {
     "01": "Alabama", "02": "Alaska", "04": "Arizona", "05": "Arkansas",
     "06": "California", "08": "Colorado", "09": "Connecticut", "10": "Delaware",
@@ -76,11 +81,16 @@ function getStateColor(d) {
             : yearData[`tas_${currentScenario}`];
         if (val === undefined) return "#2a2d3e";
         return tempScale(val);
-    } else {
+    } else if (currentVar === "precipitation") {
         const val = currentScenario === "historical"
             ? yearData.pr_hist
             : yearData[`pr_${currentScenario}`];
         return val !== undefined ? precipScale(val) : "#2a2d3e";
+    } else {
+        const val = currentScenario === "historical"
+            ? yearData.hurs_hist
+            : yearData[`hurs_${currentScenario}`];
+        return val !== undefined ? humidityScale(val) : "#2a2d3e";
     }
 }
 
@@ -99,7 +109,6 @@ function updateMap() {
     }
 }
 
-// Create tooltip first
 const tooltip = d3.select("body").append("div")
     .attr("id", "map-tooltip")
     .style("position", "absolute")
@@ -249,7 +258,7 @@ function drawLegend() {
     const grad = defs.append("linearGradient").attr("id", "legend-grad");
 
     if (currentVar === "temperature") {
-        document.getElementById("legend-label").textContent = currentMonth !== null 
+        document.getElementById("legend-label").textContent = currentMonth !== null
             ? `Temperature Anomaly (${monthNames[currentMonth - 1]}): yellow = cooler, red = hotter`
             : "Temperature Anomaly (Annual avg): yellow = cooler, red = hotter";
         d3.range(0, 1.01, 0.1).forEach(t => {
@@ -267,7 +276,7 @@ function drawLegend() {
             .call(d3.axisBottom(scale).ticks(5).tickSize(3))
             .call(g => g.select(".domain").remove())
             .call(g => g.selectAll("text").style("fill", "#888").style("font-size", "10px"));
-    } else {
+    } else if (currentVar === "precipitation") {
         document.getElementById("legend-label").textContent = "Precipitation (mm/day): light = dry, dark = wet";
         d3.range(0, 1.01, 0.1).forEach(t => {
             grad.append("stop")
@@ -275,6 +284,23 @@ function drawLegend() {
                 .attr("stop-color", precipScale(t * 6));
         });
         const scale = d3.scaleLinear().domain([0, 6]).range([0, legendWidth]);
+        legendSvg.append("rect")
+            .attr("x", 10)
+            .attr("width", legendWidth).attr("height", legendHeight)
+            .style("fill", "url(#legend-grad)");
+        legendSvg.append("g")
+            .attr("transform", `translate(10, ${legendHeight})`)
+            .call(d3.axisBottom(scale).ticks(5).tickSize(3))
+            .call(g => g.select(".domain").remove())
+            .call(g => g.selectAll("text").style("fill", "#888").style("font-size", "10px"));
+    } else {
+        document.getElementById("legend-label").textContent = "Relative Humidity (%): light = dry, dark = humid";
+        d3.range(0, 1.01, 0.1).forEach(t => {
+            grad.append("stop")
+                .attr("offset", `${t * 100}%`)
+                .attr("stop-color", humidityScale(30 + t * 60));
+        });
+        const scale = d3.scaleLinear().domain([30, 90]).range([0, legendWidth]);
         legendSvg.append("rect")
             .attr("x", 10)
             .attr("width", legendWidth).attr("height", legendHeight)
@@ -303,9 +329,20 @@ function showSidebar(d) {
     const pr = currentScenario === "historical"
         ? yearData?.pr_hist
         : yearData?.[`pr_${currentScenario}`];
+    const hurs = currentScenario === "historical"
+        ? yearData?.hurs_hist
+        : yearData?.[`hurs_${currentScenario}`];
+    const tasmax = currentScenario === "historical"
+        ? null
+        : yearData?.[`tasmax_${currentScenario}`];
+    const tasmin = currentScenario === "historical"
+        ? null
+        : yearData?.[`tasmin_${currentScenario}`];
 
     const tasRaw_F = tasRaw !== undefined ? (tasRaw * 9/5 + 32).toFixed(1) : null;
     const tas_F = tas !== undefined ? (tas * 9/5).toFixed(2) : null;
+    const tasmax_F = tasmax !== null && tasmax !== undefined ? (tasmax * 9/5 + 32).toFixed(1) : null;
+    const tasmin_F = tasmin !== null && tasmin !== undefined ? (tasmin * 9/5 + 32).toFixed(1) : null;
 
     const scenarioLabels = {
         "historical": "Historical",
@@ -330,6 +367,20 @@ function showSidebar(d) {
             <span class="stat-label">Precipitation</span>
             <span class="stat-value">${pr !== undefined ? pr.toFixed(2) + " mm/day" : "N/A"}</span>
         </div>
+        <div class="stat-item">
+            <span class="stat-label">Relative Humidity</span>
+            <span class="stat-value">${hurs !== undefined ? hurs.toFixed(1) + "%" : "N/A"}</span>
+        </div>
+        ${tasmax_F !== null ? `
+        <div class="stat-item">
+            <span class="stat-label">Hottest Day of Year</span>
+            <span class="stat-value">${tasmax_F} °F</span>
+        </div>` : ""}
+        ${tasmin_F !== null ? `
+        <div class="stat-item">
+            <span class="stat-label">Coldest Day of Year</span>
+            <span class="stat-value">${tasmin_F} °F</span>
+        </div>` : ""}
         <div class="stat-item">
             <span class="stat-label">Year</span>
             <span class="stat-value">${currentYear} — ${monthLabel}</span>
@@ -408,10 +459,14 @@ function renderComparePanel() {
     const getTas = (yd) => currentScenario === "historical" ? yd?.tas_hist : yd?.[`tas_${currentScenario}`];
     const getTasRaw = (yd) => currentScenario === "historical" ? yd?.tas_raw : yd?.[`tas_raw_${currentScenario}`];
     const getPr = (yd) => currentScenario === "historical" ? yd?.pr_hist : yd?.[`pr_${currentScenario}`];
+    const getHurs = (yd) => currentScenario === "historical" ? yd?.hurs_hist : yd?.[`hurs_${currentScenario}`];
+    const getTasmax = (yd) => currentScenario === "historical" ? null : yd?.[`tasmax_${currentScenario}`];
+    const getTasmin = (yd) => currentScenario === "historical" ? null : yd?.[`tasmin_${currentScenario}`];
 
-    const formatTemp = (val) => val !== undefined ? (val * 9/5 + 32).toFixed(1) + " °F" : "N/A";
+    const formatTemp = (val) => val !== undefined && val !== null ? (val * 9/5 + 32).toFixed(1) + " °F" : "N/A";
     const formatWarming = (val) => val !== undefined ? (val > 0 ? "+" : "") + (val * 9/5).toFixed(2) + " °F" : "N/A";
     const formatPr = (val) => val !== undefined ? val.toFixed(2) + " mm/day" : "N/A";
+    const formatHurs = (val) => val !== undefined ? val.toFixed(1) + "%" : "N/A";
 
     const scenarioLabels = {
         "historical": "Historical",
@@ -426,12 +481,24 @@ function renderComparePanel() {
     if (!panel) {
         panel = document.createElement("div");
         panel.id = "compare-panel";
-        document.getElementById("app").insertBefore(panel, document.getElementById("writeup"));
+        document.getElementById("app").insertBefore(panel, document.getElementById("takeaway"));
         document.getElementById("map-container").style.display = "none";
         document.getElementById("legend").style.display = "none";
     }
 
     document.getElementById("mode-indicator").innerHTML = `Comparing: ${name1} vs ${name2}`;
+
+    const tasmaxRow = (yd) => getTasmax(yd) !== null ? `
+        <div class="compare-stat">
+            <span class="stat-label">Hottest Day of Year</span>
+            <span class="stat-value">${formatTemp(getTasmax(yd))}</span>
+        </div>` : "";
+
+    const tasminRow = (yd) => getTasmin(yd) !== null ? `
+        <div class="compare-stat">
+            <span class="stat-label">Coldest Day of Year</span>
+            <span class="stat-value">${formatTemp(getTasmin(yd))}</span>
+        </div>` : "";
 
     panel.innerHTML = `
         <div class="compare-header">
@@ -453,6 +520,12 @@ function renderComparePanel() {
                     <span class="stat-label">Precipitation</span>
                     <span class="stat-value">${formatPr(getPr(yearData1))}</span>
                 </div>
+                <div class="compare-stat">
+                    <span class="stat-label">Relative Humidity</span>
+                    <span class="stat-value">${formatHurs(getHurs(yearData1))}</span>
+                </div>
+                ${tasmaxRow(yearData1)}
+                ${tasminRow(yearData1)}
             </div>
             <div class="compare-divider">VS</div>
             <div class="compare-state">
@@ -469,6 +542,12 @@ function renderComparePanel() {
                     <span class="stat-label">Precipitation</span>
                     <span class="stat-value">${formatPr(getPr(yearData2))}</span>
                 </div>
+                <div class="compare-stat">
+                    <span class="stat-label">Relative Humidity</span>
+                    <span class="stat-value">${formatHurs(getHurs(yearData2))}</span>
+                </div>
+                ${tasmaxRow(yearData2)}
+                ${tasminRow(yearData2)}
             </div>
         </div>
     `;
