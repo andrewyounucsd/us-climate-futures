@@ -437,6 +437,7 @@ body {
 #scrolly {
     position: relative;
     background: #0f1117;
+    min-height: 100vh;
 }
 
 #scrolly-overlay {
@@ -447,10 +448,19 @@ body {
     align-items: center;
     justify-content: center;
     pointer-events: none;
+    z-index: 10;
 }
 
-#scrolly-spacer {
-    height: 400vh;
+#scrolly-steps {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    pointer-events: none;
+}
+
+.scrolly-trigger {
+    height: 100vh;
 }
 
 .scrolly-step {

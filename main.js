@@ -577,20 +577,20 @@ const scroller = scrollama();
 
 scroller
     .setup({
-        step: ".scrolly-step",
+        step: ".scrolly-trigger",
         offset: 0.5,
-        progress: true
     })
     .onStepEnter(({ element }) => {
+        const step = element.dataset.step;
         document.querySelectorAll(".scrolly-step").forEach(el => el.classList.remove("active"));
-        element.classList.add("active");
+        document.querySelector(`.scrolly-step[data-step="${step}"]`).classList.add("active");
     })
     .onStepExit(({ element, direction }) => {
         if (direction === "up") {
-            element.classList.remove("active");
-            const prev = element.previousElementSibling;
-            if (prev && prev.classList.contains("scrolly-step")) {
-                prev.classList.add("active");
+            const step = +element.dataset.step;
+            document.querySelectorAll(".scrolly-step").forEach(el => el.classList.remove("active"));
+            if (step > 1) {
+                document.querySelector(`.scrolly-step[data-step="${step - 1}"]`).classList.add("active");
             }
         }
     });
