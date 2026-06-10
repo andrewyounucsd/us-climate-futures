@@ -11,6 +11,14 @@ let compareState2 = null;
 let compareMode = false;
 let selectedState = null;
 
+window.onbeforeunload = function() {
+    window.scrollTo(0, 0);
+};
+
+window.addEventListener("load", () => {
+    window.scrollTo(0, 0);
+});
+
 const monthNames = ["January", "February", "March", "April", "May", "June",
                     "July", "August", "September", "October", "November", "December"];
 

@@ -493,3 +493,40 @@ body {
     color: #888;
     line-height: 1.6;
 }
+
+html {
+    scroll-behavior: auto;
+}
+
+#takeaway {
+    max-width: 800px;
+    margin: 60px auto 40px;
+    padding: 40px;
+    background: #1e2130;
+    border: 1px solid #2a2d3e;
+    border-radius: 16px;
+    border-left: 4px solid #3a86ff;
+}
+
+#takeaway h2 {
+    font-size: 1.8rem;
+    color: #fff;
+    margin-bottom: 20px;
+}
+
+#takeaway p {
+    font-size: 1rem;
+    color: #888;
+    line-height: 1.8;
+    margin-bottom: 16px;
+}
+
+.takeaway-highlight {
+    font-size: 1.1rem !important;
+    color: #e0e0e0 !important;
+    font-weight: 600;
+    font-style: italic;
+    border-top: 1px solid #2a2d3e;
+    padding-top: 16px;
+    margin-top: 8px;
+}
