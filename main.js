@@ -572,3 +572,27 @@ function exitCompareMode() {
     document.getElementById("mode-indicator").style.display = "none";
     document.getElementById("reset-bar").classList.add("hidden");
 }
+
+const scroller = scrollama();
+
+scroller
+    .setup({
+        step: ".scrolly-step",
+        offset: 0.5,
+        progress: true
+    })
+    .onStepEnter(({ element }) => {
+        document.querySelectorAll(".scrolly-step").forEach(el => el.classList.remove("active"));
+        element.classList.add("active");
+    })
+    .onStepExit(({ element, direction }) => {
+        if (direction === "up") {
+            element.classList.remove("active");
+            const prev = element.previousElementSibling;
+            if (prev && prev.classList.contains("scrolly-step")) {
+                prev.classList.add("active");
+            }
+        }
+    });
+
+window.addEventListener("resize", scroller.resize);
