@@ -586,7 +586,7 @@ const scroller = scrollama();
 scroller
     .setup({
         step: ".scrolly-trigger",
-        offset: 0.5,
+        offset: 0.1,
     })
     .onStepEnter(({ element }) => {
         const step = element.dataset.step;
